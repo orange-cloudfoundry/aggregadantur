@@ -83,7 +83,7 @@ type AggregateEndpoint struct {
 
 func NewAggregateRoute(
 	name string,
-	site string,
+	identifier string,
 	upstream *Upstream,
 	aggrEndpoints AggregateEndpoints,
 	auth Auth,
@@ -101,13 +101,24 @@ func NewAggregateRoute(
 		Auth:               auth,
 		Path:               "",
 		AggregateEndpoints: aggrEndpoints,
-		Identifier:         site,
+		Identifier:         identifier,
 	}
 	err := r.Check()
 	if err != nil {
 		return nil, err
 	}
 	return r, nil
+}
+
+func NewAggregateRouteWithHandler(
+	name string,
+	identifier string,
+	handler http.Handler,
+	aggrEndpoints AggregateEndpoints,
+	auth Auth,
+	includes, excludes PathMatchers,
+) (*AggregateRoute, error) {
+	return NewAggregateRoute(name, identifier, NewUpstreamFromHandler(handler), aggrEndpoints, auth, includes, excludes)
 }
 
 type AggregateRoute struct {
@@ -171,9 +182,6 @@ func (r *AggregateRoute) Check() error {
 	if r.Identifier == "" {
 		return fmt.Errorf("You must provide an identifier to your routes")
 	}
-	if r.Includes == nil || len(r.Includes) == 0 {
-		return fmt.Errorf("You must provide at least an include to your routes")
-	}
 
 	if r.Upstream != nil && r.Upstream.URL != nil && r.Upstream.URL.Scheme == "" {
 		return fmt.Errorf("Invalid URL : scheme is missing")
@@ -182,10 +190,6 @@ func (r *AggregateRoute) Check() error {
 		r.Path = "/"
 	}
 	return nil
-}
-
-func (r *AggregateRoute) RequestPath(req *http.Request) string {
-	return req.URL.Path
 }
 
 func (r *AggregateRoute) InjectForwardUrl(req *http.Request) {

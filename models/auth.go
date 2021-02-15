@@ -28,7 +28,7 @@ type Auth struct {
 	// Oauth2 auth
 	Oauth2Auth            *Oauth2Auth `json:"oauth2" yaml:"oauth2" cloud:"oauth2"`
 	BasicAuth             *BasicAuth  `json:"basic_auth" yaml:"basic" cloud:"basic_auth"`
-	JWTCheck              JWTChecks   `json:"jwt_check" yaml:"jwt_checks" cloud:"jwt_check"`
+	JWTCheck              JWTChecks   `json:"jwt_checks" yaml:"jwt_checks" cloud:"jwt_checks"`
 	LoginPageTemplate     string      `json:"login_page_template" yaml:"login_page_template" cloud:"login_page_template"`
 	LoginPageTemplatePath string      `json:"login_page_template_path" yaml:"login_page_template_path" cloud:"login_page_template_path"`
 }

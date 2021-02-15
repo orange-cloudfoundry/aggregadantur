@@ -59,6 +59,7 @@ func createReverseHandler(proxyRoute *models.AggregateRoute) (http.Handler, erro
 		entry.Debug("orange-cloudfoundry/aggregadantur/proxy: Handler for routes will use direct stream.")
 		fwd, err = forward.New(forward.RoundTripper(transport), forward.Stream(true))
 	}
+
 	if err != nil {
 		return nil, err
 	}

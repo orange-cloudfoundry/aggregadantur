@@ -1,6 +1,6 @@
 # Aggregadantur
 
-Aggregadantur is a lib to handle aggregation and security over oauth2/baic auth (basic auth is recommended only for
+Aggregadantur is a lib to handle aggregation and security over oauth2/basic auth (basic auth is recommended only for
 testing) on multiple endpoints.
 
 It has an embedded small server to be used as reverse proxy in front of a website.
