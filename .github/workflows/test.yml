@@ -24,7 +24,6 @@ jobs:
 
       - name: get deps
         run: |
-          go mod download
           go mod tidy
           if [ ! -z "$(git status --porcelain)" ]; then
             echo "::error::modules are not tidy, please run go mod tidy"
