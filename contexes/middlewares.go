@@ -40,7 +40,7 @@ func SetJwtClaim(req *http.Request, jwtClaim *jwtclaim.ScopeClaims) {
 
 // retrieve jwt claim from request context
 func JwtClaim(req *http.Request) *jwtclaim.ScopeClaims {
-	val := GetContextValue(req, ScopeContextKey, nil)
+	val := GetContextValue(req, JwtClaimContextKey, nil)
 	if val == nil {
 		return nil
 	}

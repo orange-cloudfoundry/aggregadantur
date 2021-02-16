@@ -43,10 +43,6 @@ func (a AuthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		a.next.ServeHTTP(w, req)
 		return
 	}
-	if req.TLS != nil && req.TLS.PeerCertificates != nil && len(req.TLS.PeerCertificates) > 0 {
-		a.next.ServeHTTP(w, req)
-		return
-	}
 
 	_, _, hasBasicAuth := req.BasicAuth()
 	if a.aggrRoute.Auth.BasicAuth != nil || hasBasicAuth {
@@ -126,6 +122,9 @@ func (a AuthHandler) retrieveJwt(req *http.Request) string {
 
 func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 	redirectUrl := req.URL.Path
+	if redirectUrl == "" {
+		redirectUrl = "/"
+	}
 	if req.URL.RawQuery != "" {
 		redirectUrl += "?" + req.URL.RawQuery
 	}
@@ -204,12 +203,10 @@ func (a AuthHandler) basicAuth(w http.ResponseWriter, req *http.Request) {
 }
 
 type AccessTokenResponse struct {
-	AccessToken  string `json:"access_token"`
-	TokenType    string `json:"token_type"`
-	RefreshToken string `json:"refresh_token"`
-	ExpiresIn    int    `json:"expires_in"`
-	Scope        string `json:"scope"`
-	Jti          string `json:"jti"`
+	AccessToken string `json:"access_token"`
+	TokenType   string `json:"token_type"`
+	ExpiresIn   int    `json:"expires_in"`
+	Scope       string `json:"scope"`
 }
 
 func (a AuthHandler) oauth2Auth(origReq *http.Request) (AccessTokenResponse, error) {

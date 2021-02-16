@@ -15,8 +15,8 @@ import (
 var _ = Describe("AggregateHandler", func() {
 	var aggrRoute *models.AggregateRoute
 	var upstreamHandler *TestHandler
-	var test2Pack *AggregateEndpointPack
-	var test3Pack *AggregateEndpointPack
+	var test2Pack *ServerPack
+	var test3Pack *ServerPack
 	var respRecorder *httptest.ResponseRecorder
 	var aggrHandler *aggregadantur.AggregateHandler
 	BeforeEach(func() {
@@ -132,17 +132,20 @@ var _ = Describe("AggregateHandler", func() {
 			req.Header.Set(aggregadantur.XAggregatorModeHeader, string(aggregadantur.AggregateModeDefault))
 			req.Header.Set("Authorization", "something")
 
-			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) {
+			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get("Authorization")).To(Equal("something"))
+				return false
 			})
-			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) {
+			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get("Authorization")).To(Equal("something"))
+				return false
 			})
-			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) {
+			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get("Authorization")).To(Equal("something"))
+				return false
 			})
 
 			aggrHandler.ServeHTTP(respRecorder, req)
@@ -155,17 +158,20 @@ var _ = Describe("AggregateHandler", func() {
 			req.Header.Set(aggregadantur.XAggregatorModeHeader, string(aggregadantur.AggregateModeDefault))
 			contexes.SetUsername(req, "user")
 
-			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) {
+			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorUsernameHeader)).To(Equal("user"))
+				return false
 			})
-			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) {
+			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorUsernameHeader)).To(Equal("user"))
+				return false
 			})
-			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) {
+			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorUsernameHeader)).To(Equal("user"))
+				return false
 			})
 
 			aggrHandler.ServeHTTP(respRecorder, req)
@@ -178,17 +184,20 @@ var _ = Describe("AggregateHandler", func() {
 			req.Header.Set(aggregadantur.XAggregatorModeHeader, string(aggregadantur.AggregateModeDefault))
 			contexes.SetScopes(req, []string{"openid", "admin"})
 
-			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) {
+			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorScopesHeader)).To(Equal("openid,admin"))
+				return false
 			})
-			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) {
+			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorScopesHeader)).To(Equal("openid,admin"))
+				return false
 			})
-			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) {
+			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorScopesHeader)).To(Equal("openid,admin"))
+				return false
 			})
 
 			aggrHandler.ServeHTTP(respRecorder, req)
