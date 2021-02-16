@@ -29,18 +29,18 @@ func (c ScopeClaims) Valid() error {
 
 	// The claims below are optional, by default, so if they are set to the
 	// default value in Go, let's not fail the verification for them.
-	if c.VerifyExpiresAt(now, false) == false {
+	if !c.VerifyExpiresAt(now, false) {
 		delta := time.Unix(now, 0).Sub(time.Unix(c.ExpiresAt, 0))
 		vErr.Inner = fmt.Errorf("token is expired by %v", delta)
 		vErr.Errors |= jwt.ValidationErrorExpired
 	}
 
-	if c.VerifyIssuedAt(now, false) == false {
+	if !c.VerifyIssuedAt(now, false) {
 		vErr.Inner = fmt.Errorf("Token used before issued")
 		vErr.Errors |= jwt.ValidationErrorIssuedAt
 	}
 
-	if c.VerifyNotBefore(now, false) == false {
+	if !c.VerifyNotBefore(now, false) {
 		vErr.Inner = fmt.Errorf("token is not valid yet")
 		vErr.Errors |= jwt.ValidationErrorNotValidYet
 	}

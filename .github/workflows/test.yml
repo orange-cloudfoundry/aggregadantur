@@ -1,14 +1,6 @@
-name: build-and-release
+name: test
 
-on:
-  push:
-    # not not consider simplec commit
-    branches:
-      - '!*'
-    # consider only release and pre-release tags
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
-      - 'v[0-9]+.[0-9]+.[0-9]+-rc[0-9]+'
+on: push
 
 jobs:
   build:
@@ -16,8 +8,6 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
       - name: set up go
         uses: actions/setup-go@v2
@@ -32,24 +22,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: tests modules
+      - name: get deps
         run: |
+          go mod download
           go mod tidy
           if [ ! -z "$(git status --porcelain)" ]; then
             echo "::error::modules are not tidy, please run go mod tidy"
             exit 1
           fi
+          go install github.com/onsi/ginkgo/ginkgo
+
+      - name: lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          # Required: the version of golangci-lint is required and must be specified without patch version: we always use the latest patch version.
+          version: v1.32
 
       - name: tests
         run: |
-          go test -v ./...
-
-      - name: run goreleaser
-        uses: goreleaser/goreleaser-action@v2
-        if: success() && startsWith(github.ref, 'refs/tags/')
-        with:
-          version: latest
-          args: release --rm-dist
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          USER: github-actions
+          go test -v ./... -args -ginkgo.randomizeAllSpecs -ginkgo.trace

@@ -159,6 +159,10 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 	session.Values["jwt_token"] = authToken.AccessToken
 	session.Options.MaxAge = authToken.ExpiresIn
 	err = session.Save(req, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	req.Header.Del("Authorization")
 
@@ -256,10 +260,7 @@ func (a AuthHandler) oauth2Auth(origReq *http.Request) (AccessTokenResponse, err
 	if err != nil {
 		return AccessTokenResponse{}, fmt.Errorf("when getting token for %s: %s", user, err.Error())
 	}
-	tokenType := accessResp.TokenType
-	if tokenType == "" {
-		tokenType = "bearer"
-	}
+
 	scopes := strings.Split(accessResp.Scope, " ")
 	for _, scopeByPriorities := range authOption.Scopes {
 		for _, scope := range scopes {

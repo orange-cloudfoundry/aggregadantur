@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	IsHandlerContextUpstream = iota
+	IsHandlerContextUpstream CtxUpstream = iota
 )
 
 type CtxUpstream int
