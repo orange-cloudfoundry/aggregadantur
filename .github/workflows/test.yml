@@ -3,7 +3,7 @@ name: test
 on: push
 
 jobs:
-  build:
+  lint-n-test:
     runs-on: ubuntu-latest
     steps:
       - name: checkout
