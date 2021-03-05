@@ -5,6 +5,7 @@ import "fmt"
 const DefaultLoginTemplate = `<html>
 <head>
   <title>Login</title>
+  <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <style>
       @import url(https://fonts.googleapis.com/css?family=Open+Sans);
 
