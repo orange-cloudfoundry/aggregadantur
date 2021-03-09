@@ -102,6 +102,7 @@ func NewAggregateRoute(
 		Path:               "",
 		AggregateEndpoints: aggrEndpoints,
 		Identifier:         identifier,
+		AllowedMethods:     []string{http.MethodGet},
 	}
 	err := r.Check()
 	if err != nil {
@@ -132,6 +133,8 @@ type AggregateRoute struct {
 	Includes PathMatchers `json:"includes" yaml:"includes" cloud:"includes"`
 	// Same pattern has includes but for excludes this time
 	Excludes PathMatchers `json:"excludes" yaml:"excludes" cloud:"excludes"`
+	// Allowed method for aggregating, by default only GET is accepted
+	AllowedMethods []string
 	// Upstream URL where all request will be redirected
 	// Query parameters can be passed, e.g.: http://localhost?param=1
 	// User and password are given as basic auth too (this is not recommended to use it), e.g.: http://user:password@localhost
@@ -170,6 +173,9 @@ func (r *AggregateRoute) UnmarshalYAML(unmarshal func(interface{}) error) error 
 func (r *AggregateRoute) Load() error {
 	if r.Hosts == nil || len(r.Hosts) == 0 {
 		r.Hosts = HostMatchers{NewHostMatcher("*")}
+	}
+	if r.AllowedMethods == nil || len(r.AllowedMethods) == 0 {
+		r.AllowedMethods = []string{http.MethodGet}
 	}
 
 	return r.Check()
@@ -252,6 +258,15 @@ func (r *AggregateRoute) InjectByEndpoint(req *http.Request, endpoint AggregateE
 	}
 	req.URL.Host = u.Host
 
+}
+
+func (r *AggregateRoute) IsMethodAllowedMethod(req *http.Request) bool {
+	for _, method := range r.AllowedMethods {
+		if req.Method == method {
+			return true
+		}
+	}
+	return false
 }
 
 func (r *AggregateRoute) MatchInclude(req *http.Request) bool {

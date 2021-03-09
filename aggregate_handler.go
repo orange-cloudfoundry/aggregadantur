@@ -1,9 +1,11 @@
 package aggregadantur
 
 import (
+	"bytes"
 	"encoding/json"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -30,7 +32,7 @@ func (a AggregateHandler) aggregatorMode(req *http.Request) AggregateMode {
 }
 
 func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodGet {
+	if !a.aggrRoute.IsMethodAllowedMethod(req) {
 		a.next.ServeHTTP(w, req)
 		return
 	}
@@ -48,8 +50,17 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	wg.Add(len(endpoints))
 	username := contexes.Username(req)
 	scopes := contexes.Scopes(req)
+
+	var previousData []byte
+	if req.Body != nil {
+		previousData, _ = ioutil.ReadAll(req.Body)
+	}
 	for _, endpoint := range endpoints {
-		reqEndpoint, err := http.NewRequest(req.Method, req.URL.String(), nil)
+		var body io.Reader = nil
+		if previousData != nil && len(previousData) > 0 {
+			body = bytes.NewBuffer(previousData)
+		}
+		reqEndpoint, err := http.NewRequest(req.Method, req.URL.String(), body)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -75,7 +86,6 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		} else {
 			go a.aggregateFromEndpoint(reqEndpoint, endpoint, syncMap, wg)
 		}
-
 	}
 	wg.Wait()
 	finalMap := make(map[string]interface{})

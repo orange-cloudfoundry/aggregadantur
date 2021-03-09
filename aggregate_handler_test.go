@@ -1,6 +1,7 @@
 package aggregadantur_test
 
 import (
+	"bytes"
 	"encoding/json"
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
@@ -8,6 +9,7 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"github.com/orange-cloudfoundry/aggregadantur/testhelper"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 )
@@ -197,6 +199,39 @@ var _ = Describe("AggregateHandler", func() {
 			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
 				Expect(req.Header.Get(aggregadantur.XAggregatorScopesHeader)).To(Equal("openid,admin"))
+				return false
+			})
+
+			aggrHandler.ServeHTTP(respRecorder, req)
+		})
+	})
+
+	When("request is a post request", func() {
+		It("Should be passed to all endpoints with data", func() {
+			aggrRoute.AllowedMethods = []string{http.MethodGet, http.MethodPost}
+
+			req := testhelper.NewRequest(http.MethodGet, "http://localhost/aggregate", bytes.NewBufferString("send data"))
+			req.Header.Set(aggregadantur.XAggregatorModeHeader, string(aggregadantur.AggregateModeDefault))
+
+			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) bool {
+				defer GinkgoRecover()
+				b, err := ioutil.ReadAll(req.Body)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(string(b)).To(Equal("send data"))
+				return false
+			})
+			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
+				defer GinkgoRecover()
+				b, err := ioutil.ReadAll(req.Body)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(string(b)).To(Equal("send data"))
+				return false
+			})
+			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
+				defer GinkgoRecover()
+				b, err := ioutil.ReadAll(req.Body)
+				Expect(err).ToNot(HaveOccurred())
+				Expect(string(b)).To(Equal("send data"))
 				return false
 			})
 

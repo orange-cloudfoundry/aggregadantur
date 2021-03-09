@@ -237,4 +237,27 @@ var _ = Describe("AggregateRoute", func() {
 			Expect(aggrRoute.MatchAuth(req)).To(BeFalse())
 		})
 	})
+	Context("IsMethodAllowedMethod", func() {
+		It("should accept only GET method when not set", func() {
+			reqGet, err := http.NewRequest(http.MethodGet, "http://localhost/metrics", nil)
+			Expect(err).NotTo(HaveOccurred())
+			reqPost, err := http.NewRequest(http.MethodPost, "http://localhost/metrics", nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(aggrRoute.IsMethodAllowedMethod(reqGet)).To(BeTrue())
+			Expect(aggrRoute.IsMethodAllowedMethod(reqPost)).To(BeFalse())
+		})
+
+		It("should accept accept methods defined by user", func() {
+			aggrRoute.AllowedMethods = []string{http.MethodPost, http.MethodGet}
+
+			reqGet, err := http.NewRequest(http.MethodGet, "http://localhost/metrics", nil)
+			Expect(err).NotTo(HaveOccurred())
+			reqPost, err := http.NewRequest(http.MethodPost, "http://localhost/metrics", nil)
+			Expect(err).NotTo(HaveOccurred())
+
+			Expect(aggrRoute.IsMethodAllowedMethod(reqGet)).To(BeTrue())
+			Expect(aggrRoute.IsMethodAllowedMethod(reqPost)).To(BeTrue())
+		})
+	})
 })
