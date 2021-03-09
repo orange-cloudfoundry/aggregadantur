@@ -57,7 +57,7 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	for _, endpoint := range endpoints {
 		var body io.Reader = nil
-		if previousData != nil && len(previousData) > 0 {
+		if len(previousData) > 0 {
 			body = bytes.NewBuffer(previousData)
 		}
 		reqEndpoint, err := http.NewRequest(req.Method, req.URL.String(), body)
