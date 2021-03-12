@@ -15,15 +15,21 @@ import (
 )
 
 type Router struct {
-	rtr   *mux.Router
-	store sessions.Store
+	rtr    *mux.Router
+	store  sessions.Store
+	tracer bool
 }
 
 func NewRouter(store sessions.Store) *Router {
 	return &Router{
-		rtr:   mux.NewRouter(),
-		store: store,
+		rtr:    mux.NewRouter(),
+		store:  store,
+		tracer: true,
 	}
+}
+
+func (r Router) DisableTracer() {
+	r.tracer = false
 }
 
 func (r Router) AddMuxRoute(route *models.AggregateRoute) error {
@@ -41,7 +47,10 @@ func (r Router) AddMuxRoute(route *models.AggregateRoute) error {
 
 	handler = NewAggregateHandler(handler, route, httpClient)
 	handler = NewAuthHandler(handler, route, httpClient, r.store)
-	handler, err = trace.New(handler, log.StandardLogger().Out)
+	if r.tracer {
+		handler, err = trace.New(handler, log.StandardLogger().Out)
+	}
+
 	if err != nil {
 		return err
 	}

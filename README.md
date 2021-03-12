@@ -52,7 +52,8 @@ func main() {
 	}))
 
 	// create a router, and add it a session store, here it is a cookie store, it is for saving session with token.
-	rtr := aggregadantur.NewRouter(sessions.NewCookieStore([]byte(myConfig.SessionKey)))
+	sess := sessions.NewCookieStore([]byte(myConfig.SessionKey))
+	rtr := aggregadantur.NewRouter(sess)
 	// add you aggregate route
 	err = rtr.AddMuxRoute(aggrRoute)
 	if err != nil {

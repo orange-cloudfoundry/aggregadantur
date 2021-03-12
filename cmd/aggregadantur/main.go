@@ -27,7 +27,8 @@ func main() {
 		return
 	}
 
-	router := aggregadantur.NewRouter(sessions.NewCookieStore([]byte(c.Server.SessionKey)))
+	sess := sessions.NewCookieStore([]byte(c.Server.SessionKey))
+	router := aggregadantur.NewRouter(sess)
 	err = router.AddMuxRoutes(c.Routes...)
 	if err != nil {
 		log.Fatal("Error loading routes: ", err.Error())

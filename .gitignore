@@ -1,3 +1,4 @@
 /cmd/aggregadantur/aggregadantur
 /*.json
 config.yml
+/aggregadantur
