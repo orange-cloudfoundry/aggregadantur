@@ -118,7 +118,7 @@ var _ = Describe("AuthHandler", func() {
 
 				authHandler.ServeHTTP(respRecorder, req)
 
-				Expect(respRecorder.Code).To(Equal(http.StatusOK))
+				Expect(respRecorder.Code).To(Equal(http.StatusUnauthorized))
 				Expect(respRecorder.Body.String()).To(Equal("Test: /"))
 			})
 			When("Post username and password from login page", func() {

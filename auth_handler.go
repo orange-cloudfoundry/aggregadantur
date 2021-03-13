@@ -134,6 +134,7 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if req.Method == http.MethodGet {
+		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(makeLoginPageHtml(
 			loginPageTemplate,
 			strings.Title(a.aggrRoute.Name),
