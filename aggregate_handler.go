@@ -3,20 +3,26 @@ package aggregadantur
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/orange-cloudfoundry/aggregadantur/contexes"
-	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"sync"
+
+	"github.com/orange-cloudfoundry/aggregadantur/contexes"
+	"github.com/orange-cloudfoundry/aggregadantur/models"
 )
 
 type AggregateHandler struct {
 	next       http.Handler
 	aggrRoute  *models.AggregateRoute
 	httpClient *http.Client
+}
+
+type Result = struct {
+	data interface{}
+	code int
 }
 
 func NewAggregateHandler(next http.Handler, aggrRoute *models.AggregateRoute, httpClient *http.Client) *AggregateHandler {
@@ -55,6 +61,7 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if req.Body != nil {
 		previousData, _ = ioutil.ReadAll(req.Body)
 	}
+
 	for _, endpoint := range endpoints {
 		var body io.Reader = nil
 		if len(previousData) > 0 {
@@ -88,11 +95,19 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		}
 	}
 	wg.Wait()
+
+	finalCode := 200
 	finalMap := make(map[string]interface{})
-	syncMap.Range(func(key, value interface{}) bool {
-		finalMap[key.(string)] = value
+	syncMap.Range(func(key interface{}, value interface{}) bool {
+		result := value.(Result)
+		if result.code > finalCode {
+			finalCode = result.code
+		}
+		finalMap[key.(string)] = result.data
 		return true
 	})
+
+	w.WriteHeader(finalCode)
 	w.Header().Set("Content-Type", "application/json")
 	marshaler := json.NewEncoder(w)
 	err := marshaler.Encode(finalMap)
@@ -100,62 +115,87 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
 }
 
+// aggregateFromHandler - populates syncMap with handler result
+// 1. inject extended error format
+// 2. inject json object
+// 3. inject fallback raw string
 func (a AggregateHandler) aggregateFromHandler(handler http.Handler, reqEndpoint *http.Request, endpoint models.AggregateEndpoint, syncMap *sync.Map, wg *sync.WaitGroup) {
+	var (
+		value interface{}
+	)
+
 	defer wg.Done()
+	rawMessage := json.RawMessage{}
 	respWriter := httptest.NewRecorder()
 	handler.ServeHTTP(respWriter, reqEndpoint)
+
 	if respWriter.Code > 399 {
-		syncMap.Store(endpoint.Identifier, map[string]interface{}{
+		// 1.
+		value = map[string]interface{}{
 			"error_from_endpoint": respWriter.Body.String(),
 			"status_code":         respWriter.Code,
-		})
-		return
+		}
+	} else if json.Unmarshal(respWriter.Body.Bytes(), &rawMessage) == nil {
+		// 2.
+		value = rawMessage
+	} else {
+		// 3.
+		value = respWriter.Body.String()
 	}
 
-	rawMessage := json.RawMessage{}
-	err := json.Unmarshal(respWriter.Body.Bytes(), &rawMessage)
-	if err != nil {
-		syncMap.Store(endpoint.Identifier, respWriter.Body.String())
-		return
-	}
-	syncMap.Store(endpoint.Identifier, rawMessage)
+	syncMap.Store(endpoint.Identifier, Result{code: respWriter.Code, data: value})
 }
 
+// aggregateFromHandler - populates syncMap with peer response
+// 1. error before request, inject proxy error with simple error format
+// 2. error on reading stream, inject proxy error with simple error format
+// 1. inject extended error format
+// 2. inject json object
+// 3. inject fallback raw string
 func (a AggregateHandler) aggregateFromEndpoint(reqEndpoint *http.Request, endpoint models.AggregateEndpoint, syncMap *sync.Map, wg *sync.WaitGroup) {
 	defer wg.Done()
+
 	resp, err := a.httpClient.Do(reqEndpoint)
 	if err != nil {
-		syncMap.Store(endpoint.Identifier, map[string]string{
-			"error": err.Error(),
-		})
+		// 1.
+		syncMap.Store(
+			endpoint.Identifier,
+			Result{code: 502, data: map[string]string{"error": err.Error()}},
+		)
 		return
 	}
+
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		syncMap.Store(endpoint.Identifier, map[string]string{
-			"error": err.Error(),
-		})
+		// 2.
+		syncMap.Store(
+			endpoint.Identifier,
+			Result{code: 502, data: map[string]string{"error": err.Error()}},
+		)
 		return
 	}
 
+	var value interface{}
+	rawMessage := json.RawMessage{}
+
 	if resp.StatusCode > 399 {
-		syncMap.Store(endpoint.Identifier, map[string]interface{}{
+		// 3.
+		value = map[string]interface{}{
 			"error_from_endpoint": string(b),
 			"status_code":         resp.StatusCode,
-		})
-		return
+		}
+	} else if json.Unmarshal(b, &rawMessage) == nil {
+		// 4.
+		value = rawMessage
+	} else {
+		// 5.
+		value = string(b)
 	}
-	rawMessage := json.RawMessage{}
-	err = json.Unmarshal(b, &rawMessage)
-	if err != nil {
-		syncMap.Store(endpoint.Identifier, string(b))
-		return
-	}
-	syncMap.Store(endpoint.Identifier, rawMessage)
+
+	syncMap.Store(endpoint.Identifier, Result{code: resp.StatusCode, data: value})
 }
 
 func (a AggregateHandler) targetsFromRequest(req *http.Request) []string {
