@@ -107,8 +107,8 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		return true
 	})
 
-	w.WriteHeader(finalCode)
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(finalCode)
 	marshaler := json.NewEncoder(w)
 	err := marshaler.Encode(finalMap)
 	if err != nil {
