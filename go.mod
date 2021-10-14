@@ -13,7 +13,7 @@ require (
 	github.com/jonboulle/clockwork v0.2.2 // indirect
 	github.com/onsi/ginkgo v1.16.4
 	github.com/onsi/gomega v1.16.0
-	github.com/prometheus/common v0.29.0
+	github.com/prometheus/common v0.31.1
 	github.com/prometheus/procfs v0.7.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
 	github.com/vulcand/oxy v1.3.0
