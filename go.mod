@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/gravitational/trace v1.1.15 // indirect
 	github.com/jonboulle/clockwork v0.2.2 // indirect
-	github.com/onsi/ginkgo v1.16.4
+	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.16.0
 	github.com/prometheus/common v0.29.0
 	github.com/prometheus/procfs v0.7.0 // indirect
