@@ -19,7 +19,7 @@ type ScopeClaims struct {
 	Scope     []string `json:"scope,omitempty"`
 }
 
-// Validates time based claims "exp, iat, nbf".
+// Valid validates time based claims "exp, iat, nbf".
 // There is no accounting for clock skew.
 // As well, if any of the above claims are not in the token, it will still
 // be considered a valid claim.
@@ -36,7 +36,7 @@ func (c ScopeClaims) Valid() error {
 	}
 
 	if !c.VerifyIssuedAt(now, false) {
-		vErr.Inner = fmt.Errorf("Token used before issued")
+		vErr.Inner = fmt.Errorf("token used before issued")
 		vErr.Errors |= jwt.ValidationErrorIssuedAt
 	}
 
@@ -48,31 +48,31 @@ func (c ScopeClaims) Valid() error {
 	return vErr
 }
 
-// Compares the aud claim against cmp.
+// VerifyAudience compares the aud claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyAudience(cmp string, req bool) bool {
 	return verifyAud(c.Audience, cmp, req)
 }
 
-// Compares the exp claim against cmp.
+// VerifyExpiresAt compares the exp claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyExpiresAt(cmp int64, req bool) bool {
 	return verifyExp(c.ExpiresAt, cmp, req)
 }
 
-// Compares the iat claim against cmp.
+// VerifyIssuedAt compares the iat claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyIssuedAt(cmp int64, req bool) bool {
 	return verifyIat(c.IssuedAt, cmp, req)
 }
 
-// Compares the iss claim against cmp.
+// VerifyIssuer compares the iss claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyIssuer(cmp string, req bool) bool {
 	return verifyIss(c.Issuer, cmp, req)
 }
 
-// Compares the nbf claim against cmp.
+// VerifyNotBefore compares the nbf claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyNotBefore(cmp int64, req bool) bool {
 	return verifyNbf(c.NotBefore, cmp, req)

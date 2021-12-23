@@ -10,7 +10,7 @@ It has an embedded small server to be used as reverse proxy in front of a websit
 ### As a lib
 
 The easiest way is to include in your configuration file a `*models.AggregateRoute` (
-see [below for configuration in your file](#configuration-route)) and add your handler afterward and finally create the
+see [below for configuration in your file](#configuration-aggregation-route)) and add your handler afterward and finally create the
 router associate to this route, example:
 
 ```go
@@ -179,7 +179,7 @@ auth:
       # Set the issuer which create the token (normally the same url as auth.oauth2.token_url
       issuer: https://localhost:8080/oauth/token
       # Set to true to not verify token expiration from current time
-      # timezone can be an issue for verifying epire time, this is anyway check after that
+      # timezone can be an issue for verifying expire time, this is anyway checked after that
       not_verify_expire: false
     - alg: RS256
       secret: "secret public key"
@@ -198,10 +198,10 @@ auth:
 
 For triggering aggregation you must pass either:
 
-- The header `X-Aggregator-Mode: aggregate`
-- The get parameter on url `aggregator_mode=aggregate`: `http://localhost?aggregator_mode=aggregate`
+- The HTTP header `X-Aggregator-Mode: aggregate`
+- The GET parameter on URL `aggregator_mode=aggregate`: `http://localhost?aggregator_mode=aggregate`
 
-When aggregating you will get json in this format:
+When aggregating you will get JSON in this format:
 
 ```json
 {
@@ -253,6 +253,6 @@ func main() {
 
 You receive headers:
 
-- `Authorization` with jwt token
+- `Authorization` with JWT token
 - `X-Aggregator-Username` with username when auth
 - `X-Aggregator-Scopes` with scopes from user

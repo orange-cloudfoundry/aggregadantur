@@ -109,8 +109,8 @@ func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *ht
 
 func (a AuthHandler) retrieveJwt(req *http.Request) string {
 	session := a.getSession(req)
-	if jwt, ok := session.Values["jwt_token"]; ok {
-		return jwt.(string)
+	if j, ok := session.Values["jwt_token"]; ok {
+		return j.(string)
 	}
 	authorization := req.Header.Get("Authorization")
 	authSplit := strings.SplitN(authorization, " ", 2)
