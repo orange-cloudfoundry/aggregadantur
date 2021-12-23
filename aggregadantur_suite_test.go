@@ -3,7 +3,7 @@ package aggregadantur_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"net/http"

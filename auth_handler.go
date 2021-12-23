@@ -6,7 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/sessions"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
