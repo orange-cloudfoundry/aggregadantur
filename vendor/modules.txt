@@ -132,19 +132,20 @@ github.com/prometheus/procfs/internal/util
 # github.com/sirupsen/logrus v1.8.1
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/vulcand/oxy v1.3.0
-## explicit; go 1.14
+# github.com/vulcand/oxy v1.4.0
+## explicit; go 1.17
 github.com/vulcand/oxy/buffer
 github.com/vulcand/oxy/forward
+github.com/vulcand/oxy/internal/holsterv4/clock
 github.com/vulcand/oxy/trace
 github.com/vulcand/oxy/utils
 # github.com/vulcand/predicate v1.2.0
 ## explicit; go 1.16
 github.com/vulcand/predicate
-# golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4
+# golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
 ## explicit; go 1.17
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20220412020605-290c469a71a5
+# golang.org/x/net v0.0.0-20220425223048-2871e0cb64e4
 ## explicit; go 1.17
 golang.org/x/net/context
 golang.org/x/net/html
