@@ -56,8 +56,8 @@ github.com/gravitational/trace/internal
 # github.com/jonboulle/clockwork v0.2.3
 ## explicit; go 1.13
 github.com/jonboulle/clockwork
-# github.com/mailgun/multibuf v0.0.0-20150714184110-565402cd71fb
-## explicit
+# github.com/mailgun/multibuf v0.1.2
+## explicit; go 1.17
 github.com/mailgun/multibuf
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 ## explicit
@@ -132,7 +132,7 @@ github.com/prometheus/procfs/internal/util
 # github.com/sirupsen/logrus v1.8.1
 ## explicit; go 1.13
 github.com/sirupsen/logrus
-# github.com/vulcand/oxy v1.4.0
+# github.com/vulcand/oxy v1.4.1
 ## explicit; go 1.17
 github.com/vulcand/oxy/buffer
 github.com/vulcand/oxy/forward
