@@ -2,7 +2,8 @@ package aggregadantur
 
 import "fmt"
 
-const DefaultLoginTemplate = `<html>
+const DefaultLoginTemplate = `<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Login</title>
@@ -28,7 +29,7 @@ const DefaultLoginTemplate = `<html>
           background-image: -webkit-gradient(linear, 0 0, 0 100%%, from(#ffffff), to(#e6e6e6));
           background-image: -webkit-linear-gradient(top, #ffffff, #e6e6e6);
           background-image: -o-linear-gradient(top, #ffffff, #e6e6e6);
-          background-image: linear-gradient(top, #ffffff, #e6e6e6);
+          background-image: linear-gradient(to top, #ffffff, #e6e6e6);
           background-repeat: repeat-x;
           filter: progid:dximagetransform.microsoft.gradient(startColorstr=#ffffff, endColorstr=#e6e6e6, GradientType=0);
           border-color: #e6e6e6 #e6e6e6 #e6e6e6;
@@ -85,7 +86,7 @@ const DefaultLoginTemplate = `<html>
           background-image: -webkit-gradient(linear, 0 0, 0 100%%, from(#6eb6de), to(#4a77d4));
           background-image: -webkit-linear-gradient(top, #6eb6de, #4a77d4);
           background-image: -o-linear-gradient(top, #6eb6de, #4a77d4);
-          background-image: linear-gradient(top, #6eb6de, #4a77d4);
+          background-image: linear-gradient(to top, #6eb6de, #4a77d4);
           background-repeat: repeat-x;
           filter: progid:dximagetransform.microsoft.gradient(startColorstr=#6eb6de, endColorstr=#4a77d4, GradientType=0);
           border: 1px solid #3762bc;
