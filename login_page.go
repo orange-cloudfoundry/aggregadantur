@@ -4,6 +4,7 @@ import "fmt"
 
 const DefaultLoginTemplate = `<html>
 <head>
+  <meta charset="utf-8">
   <title>Login</title>
   <link rel="icon" href="data:;base64,iVBORw0KGgo=">
   <style>
