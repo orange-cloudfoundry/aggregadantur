@@ -247,7 +247,7 @@ func (a AuthHandler) oauth2Auth(origReq *http.Request) (AccessTokenResponse, err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		if resp.StatusCode == 401 || resp.StatusCode == 403 {
-			return AccessTokenResponse{}, fmt.Errorf("Unauthorized on uaa")
+			return AccessTokenResponse{}, fmt.Errorf("%d: Unauthorized on uaa", resp.StatusCode)
 		}
 		b, _ := ioutil.ReadAll(resp.Body)
 		return AccessTokenResponse{}, fmt.Errorf("from oauth server %d: %s", resp.StatusCode, string(b))
