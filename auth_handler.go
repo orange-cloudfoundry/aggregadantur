@@ -6,7 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
-	"github.com/form3tech-oss/jwt-go"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/sessions"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
@@ -109,8 +109,8 @@ func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *ht
 
 func (a AuthHandler) retrieveJwt(req *http.Request) string {
 	session := a.getSession(req)
-	if jwt, ok := session.Values["jwt_token"]; ok {
-		return jwt.(string)
+	if j, ok := session.Values["jwt_token"]; ok {
+		return j.(string)
 	}
 	authorization := req.Header.Get("Authorization")
 	authSplit := strings.SplitN(authorization, " ", 2)
