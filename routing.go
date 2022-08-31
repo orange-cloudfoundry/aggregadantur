@@ -28,7 +28,7 @@ func NewRouter(store sessions.Store) *Router {
 	}
 }
 
-func (r Router) DisableTracer() {
+func (r *Router) DisableTracer() {
 	r.tracer = false
 }
 
