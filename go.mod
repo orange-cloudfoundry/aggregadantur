@@ -12,7 +12,7 @@ require (
 	github.com/onsi/gomega v1.24.0
 	github.com/prometheus/common v0.37.0
 	github.com/sirupsen/logrus v1.9.0
-	github.com/vulcand/oxy v1.4.1
+	github.com/vulcand/oxy v1.4.2
 	gopkg.in/yaml.v2 v2.4.0
 )
 
