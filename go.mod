@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/sessions v1.2.1
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.24.1
-	github.com/prometheus/common v0.37.0
+	github.com/prometheus/common v0.38.0
 	github.com/sirupsen/logrus v1.9.0
 	github.com/vulcand/oxy v1.4.2
 	gopkg.in/yaml.v2 v2.4.0
@@ -29,6 +29,7 @@ require (
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/gravitational/trace v1.1.19 // indirect
 	github.com/jonboulle/clockwork v0.3.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mailgun/multibuf v0.1.2 // indirect
 	github.com/matttproud/golang_protobuf_extensions v1.0.2 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
