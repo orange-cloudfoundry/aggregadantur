@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/alecthomas/kingpin v2.2.6+incompatible
 	github.com/gobwas/glob v0.2.3
-	github.com/golang-jwt/jwt/v4 v4.4.3
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
 	github.com/onsi/ginkgo v1.16.5
