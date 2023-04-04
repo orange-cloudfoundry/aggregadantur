@@ -2,7 +2,7 @@ package main
 
 import (
 	"crypto/tls"
-	"github.com/alecthomas/kingpin"
+	"github.com/alecthomas/kingpin/v2"
 	"github.com/gorilla/sessions"
 	"github.com/orange-cloudfoundry/aggregadantur"
 	"github.com/prometheus/common/version"
