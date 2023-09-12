@@ -11,8 +11,9 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -137,7 +138,7 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(makeLoginPageHtml(
 			loginPageTemplate,
-			strings.Title(a.aggrRoute.Name),
+			cases.Title(language.AmericanEnglish).String(a.aggrRoute.Name),
 			redirectUrl,
 		)))
 		return
@@ -249,10 +250,10 @@ func (a AuthHandler) oauth2Auth(origReq *http.Request) (AccessTokenResponse, err
 		if resp.StatusCode == 401 || resp.StatusCode == 403 {
 			return AccessTokenResponse{}, fmt.Errorf("%d: Unauthorized on uaa", resp.StatusCode)
 		}
-		b, _ := ioutil.ReadAll(resp.Body)
+		b, _ := io.ReadAll(resp.Body)
 		return AccessTokenResponse{}, fmt.Errorf("from oauth server %d: %s", resp.StatusCode, string(b))
 	}
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return AccessTokenResponse{}, fmt.Errorf("when getting token for %s: %s", user, err.Error())
 	}

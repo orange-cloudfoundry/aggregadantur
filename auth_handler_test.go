@@ -141,7 +141,7 @@ var _ = Describe("AuthHandler", func() {
 					Expect(respRecorder.Header().Get("Location")).To(Equal("/"))
 				})
 
-				It("should sunauthorized if user is incorrect", func() {
+				It("should be unauthorized if user is incorrect", func() {
 					form := url.Values{}
 					form.Add("username", "user")
 					form.Add("password", "password")
@@ -165,7 +165,7 @@ var _ = Describe("AuthHandler", func() {
 			})
 		})
 		Context("Token jwt is given", func() {
-			It("should pass request and apply headers and contexes in request if token is correct", func() {
+			It("should pass request and apply headers and contexts in request if token is correct", func() {
 				req := testhelper.NewRequest(http.MethodGet, "http://localhost", nil)
 				req.Header.Set("Authorization", "Bearer "+jwtToken)
 
@@ -183,14 +183,14 @@ var _ = Describe("AuthHandler", func() {
 			})
 			It("should unauthorized if token is incorrect", func() {
 				req := testhelper.NewRequest(http.MethodGet, "http://localhost", nil)
-				req.Header.Set("Authorization", "Bearer "+jwtToken+"incorect")
+				req.Header.Set("Authorization", "Bearer "+jwtToken+"incorrect")
 
 				authHandler.ServeHTTP(respRecorder, req)
 
 				Expect(respRecorder.Code).To(Equal(http.StatusUnauthorized))
 			})
 			When("token is in session", func() {
-				It("should pass request and apply headers and contexes in request if token is correct", func() {
+				It("should pass request and apply headers and contexts in request if token is correct", func() {
 					req := testhelper.NewRequest(http.MethodGet, "http://localhost", nil)
 					sess, err := store.Get(req, "auth-test")
 					Expect(err).ToNot(HaveOccurred())

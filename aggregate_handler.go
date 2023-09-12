@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -59,7 +58,7 @@ func (a AggregateHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 
 	var previousData []byte
 	if req.Body != nil {
-		previousData, _ = ioutil.ReadAll(req.Body)
+		previousData, _ = io.ReadAll(req.Body)
 	}
 
 	for _, endpoint := range endpoints {
@@ -168,7 +167,7 @@ func (a AggregateHandler) aggregateFromEndpoint(reqEndpoint *http.Request, endpo
 	}
 
 	defer resp.Body.Close()
-	b, err := ioutil.ReadAll(resp.Body)
+	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		// 2.
 		syncMap.Store(
