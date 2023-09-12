@@ -33,7 +33,6 @@ var _ = Describe("AggregateRoute", func() {
 			models.Auth{},
 			models.PathMatchers{models.NewPathMatcher("/**")},
 			models.PathMatchers{models.NewPathMatcher("/metrics")},
-
 		)
 		Expect(err).NotTo(HaveOccurred())
 	})

@@ -48,7 +48,6 @@ var _ = Describe("AggregateHandler", func() {
 			models.Auth{},
 			models.PathMatchers{models.NewPathMatcher("/**")},
 			models.PathMatchers{models.NewPathMatcher("/metrics")},
-
 		)
 
 		Expect(err).NotTo(HaveOccurred())
@@ -115,7 +114,7 @@ var _ = Describe("AggregateHandler", func() {
 		Expect(res["test3"]).To(Equal("test3"))
 	})
 	When("aggregator_targets is set", func() {
-		It("should give all targets targetted and not more", func() {
+		It("should give all targets targeted and not more", func() {
 			req := testhelper.NewRequest(http.MethodGet, "http://localhost/aggregate", nil)
 			req.Header.Set(aggregadantur.XAggregatorModeHeader, string(aggregadantur.AggregateModeDefault))
 			req.Header.Set(aggregadantur.XAggregatorTargetsHeader, "test2,test3")
