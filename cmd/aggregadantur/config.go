@@ -7,7 +7,6 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"os"
 )
 
@@ -75,7 +74,7 @@ func (c *Config) UnmarshalYAML(unmarshal func(interface{}) error) error {
 }
 
 func GetConfig(configPath string) (Config, error) {
-	b, err := ioutil.ReadFile(configPath)
+	b, err := os.ReadFile(configPath)
 	if err != nil {
 		return Config{}, err
 	}

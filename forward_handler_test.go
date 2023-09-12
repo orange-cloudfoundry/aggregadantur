@@ -8,7 +8,7 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"github.com/orange-cloudfoundry/aggregadantur/testhelper"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -20,7 +20,7 @@ var _ = Describe("ForwardHandler", func() {
 	var aggrRoute *models.AggregateRoute
 	var fwdHandler *aggregadantur.ForwardHandler
 	BeforeEach(func() {
-		log.StandardLogger().Out = ioutil.Discard
+		log.StandardLogger().Out = io.Discard
 		var err error
 		respRecorder = httptest.NewRecorder()
 		pack = NewAggregateEndpointPack("test")

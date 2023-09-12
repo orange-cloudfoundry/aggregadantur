@@ -9,7 +9,7 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"github.com/orange-cloudfoundry/aggregadantur/testhelper"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 )
@@ -215,21 +215,21 @@ var _ = Describe("AggregateHandler", func() {
 
 			upstreamHandler.SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
-				b, err := ioutil.ReadAll(req.Body)
+				b, err := io.ReadAll(req.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(b)).To(Equal("send data"))
 				return false
 			})
 			test2Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
-				b, err := ioutil.ReadAll(req.Body)
+				b, err := io.ReadAll(req.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(b)).To(Equal("send data"))
 				return false
 			})
 			test3Pack.Handler().SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 				defer GinkgoRecover()
-				b, err := ioutil.ReadAll(req.Body)
+				b, err := io.ReadAll(req.Body)
 				Expect(err).ToNot(HaveOccurred())
 				Expect(string(b)).To(Equal("send data"))
 				return false

@@ -3,7 +3,7 @@ package models
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 func NewAuthWithOauth2(
@@ -40,7 +40,7 @@ func (a Auth) MakeLoginPageTemplate(defaultTemplate string) (string, error) {
 	if a.LoginPageTemplatePath == "" {
 		return defaultTemplate, nil
 	}
-	b, err := ioutil.ReadFile(a.LoginPageTemplatePath)
+	b, err := os.ReadFile(a.LoginPageTemplatePath)
 	if err != nil {
 		return "", err
 	}
