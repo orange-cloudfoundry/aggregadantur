@@ -11,6 +11,8 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -137,7 +139,7 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		w.Write([]byte(makeLoginPageHtml(
 			loginPageTemplate,
-			strings.Title(a.aggrRoute.Name),
+			cases.Title(language.AmericanEnglish).String(a.aggrRoute.Name),
 			redirectUrl,
 		)))
 		return
