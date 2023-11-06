@@ -7,7 +7,7 @@ require (
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/sessions v1.2.1
+	github.com/gorilla/sessions v1.2.2
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.29.0
 	github.com/prometheus/common v0.45.0
@@ -24,7 +24,7 @@ require (
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
-	github.com/gorilla/securecookie v1.1.1 // indirect
+	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/gravitational/trace v1.2.1 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
