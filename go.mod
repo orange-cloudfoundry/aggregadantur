@@ -9,7 +9,7 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.2.2
 	github.com/onsi/ginkgo v1.16.5
-	github.com/onsi/gomega v1.29.0
+	github.com/onsi/gomega v1.30.0
 	github.com/prometheus/common v0.45.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/vulcand/oxy v1.4.2
