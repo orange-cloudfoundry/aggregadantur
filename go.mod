@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/sessions v1.2.2
 	github.com/onsi/ginkgo v1.16.5
 	github.com/onsi/gomega v1.30.0
-	github.com/prometheus/common v0.45.0
+	github.com/prometheus/common v0.46.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/vulcand/oxy v1.4.2
 	golang.org/x/text v0.14.0
@@ -30,7 +30,6 @@ require (
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mailgun/multibuf v0.2.0 // indirect
-	github.com/matttproud/golang_protobuf_extensions/v2 v2.0.0 // indirect
 	github.com/nxadm/tail v1.4.11 // indirect
 	github.com/prometheus/client_golang v1.18.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
