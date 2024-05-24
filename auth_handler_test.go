@@ -2,7 +2,7 @@ package aggregadantur_test
 
 import (
 	"github.com/gorilla/sessions"
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
