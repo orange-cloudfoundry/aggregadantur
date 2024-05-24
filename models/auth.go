@@ -21,9 +21,9 @@ func NewAuthWithOauth2(
 }
 
 type Auth struct {
-	// Where to do Auth
+	// Includes Where to do Auth
 	Includes PathMatchers `json:"includes" yaml:"includes" cloud:"includes"`
-	// Where not to do Auth
+	// Excludes Where not to do Auth
 	Excludes PathMatchers `json:"excludes" yaml:"excludes" cloud:"excludes"`
 	// Oauth2 auth
 	Oauth2Auth            *Oauth2Auth `json:"oauth2" yaml:"oauth2" cloud:"oauth2"`
@@ -123,15 +123,15 @@ func (a Auth) Match(path string) bool {
 type JWTChecks []JWTCheck
 
 type JWTCheck struct {
-	// Algorithm to use to validate the token
+	// Alg Algorithm to use to validate the token
 	// This is mandatory due to a security issue (see: https://auth0.com/blog/2015/03/31/critical-vulnerabilities-in-json-web-token-libraries)
 	Alg string `json:"alg" yaml:"alg" cloud:"alg"`
 	// Secret or private key to verify the jwt
 	// This is required
 	Secret string `json:"secret" yaml:"secret" cloud:"secret"`
-	// it will validate that the jwt contains this issuer
+	// Issuer It will validate that the jwt contains this issuer
 	Issuer string `json:"issuer" yaml:"issuer" cloud:"issuer"`
-	// Set to true to not verify issued at of token (Useful when you have different time between user and server)
+	// NotVerifyIssuedAt Set to true to not verify issued at of token (Useful when you have different time between user and server)
 	NotVerifyIssuedAt bool `json:"not_verify_issued_at" yaml:"not_verify_expire" cloud:"not_verify_issued_at"`
 }
 

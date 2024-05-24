@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-// Add a context value to an http request without having to override request by yourself
+// AddContextValue Add a context value to a HTTP request without having to override request by yourself
 func AddContextValue(req *http.Request, key, val interface{}) {
 	parentContext := req.Context()
 	ctxValueReq := req.WithContext(context.WithValue(parentContext, key, val))

@@ -131,28 +131,28 @@ type AggregateRoute struct {
 	//   - appending /** will mark everything to aggregate
 	// e.g.: /app/**
 	Includes PathMatchers `json:"includes" yaml:"includes" cloud:"includes"`
-	// Same pattern has includes but for excludes this time
+	// Excludes Same pattern has Includes but for excludes this time
 	Excludes PathMatchers `json:"excludes" yaml:"excludes" cloud:"excludes"`
-	// Allowed method for aggregating, by default only GET is accepted
+	// AllowedMethods Allowed method for aggregating, by default only GET is accepted
 	AllowedMethods []string
 	// Upstream URL where all request will be redirected
 	// Query parameters can be passed, e.g.: http://localhost?param=1
 	// User and password are given as basic auth too (this is not recommended to use it), e.g.: http://user:password@localhost
 	Upstream *Upstream `json:"upstream" yaml:"upstream" cloud:"upstream"`
-	// By default response from upstream are buffered, it can be issue when sending big files
+	// NoBuffer By default, response from upstream are buffered, it can be issue when sending big files
 	// Set to true to stream response
 	NoBuffer bool `json:"no_buffer" yaml:"no_buffer" cloud:"no_buffer"`
-	// Set to true to not check ssl certificates from upstream (not really recommended)
+	// InsecureSkipVerify Set to true to not check SSL certificates from upstream (not really recommended)
 	InsecureSkipVerify bool `json:"insecure_skip_verify" yaml:"insecure_skip_verify" cloud:"insecure_skip_verify"`
-	// Will forward directly to proxified route OPTIONS method without using middlewares
+	// OptionsPassthrough Will forward directly to proxied route OPTIONS method without using middlewares
 	OptionsPassthrough bool `json:"options_passthrough" yaml:"options_passthrough" cloud:"options_passthrough"`
-	// Must match host
+	// Hosts Must match host
 	Hosts HostMatchers `json:"hosts" yaml:"hosts" cloud:"hosts"`
 	// Auth
 	Auth Auth `json:"auth" yaml:"auth" cloud:"auth"`
 	// Path
 	Path string `json:"path" yaml:"path" cloud:"path"`
-	// endpoints
+	// AggregateEndpoints endpoints
 	AggregateEndpoints AggregateEndpoints `json:"aggregate_endpoints" yaml:"aggregate_endpoints" cloud:"aggregate_endpoints"`
 	Identifier         string             `json:"identifier" yaml:"identifier" cloud:"identifier"`
 }
