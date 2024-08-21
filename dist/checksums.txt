@@ -1,0 +1,2 @@
+c540156181d8af51f0151e93ef630a8c343f9b24424501c87e1e5375298c9162  aggregadantur_1.65.0_darwin_amd64.tar.gz
+8aaaa45aeae1e7171bc7aeb4dcd1fc5fb3e2e93638f10574f89a94c7055117e7  aggregadantur_1.65.0_linux_amd64.tar.gz

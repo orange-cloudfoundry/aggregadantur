@@ -1,14 +1,13 @@
 module github.com/orange-cloudfoundry/aggregadantur
 
-go 1.22.3
-toolchain go1.23.0
+go 1.22.6
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/gorilla/mux v1.8.1
-	github.com/gorilla/sessions v1.4.0
+	github.com/gorilla/sessions v1.3.0
 	github.com/onsi/ginkgo/v2 v2.20.0
 	github.com/onsi/gomega v1.34.1
 	github.com/prometheus/common v0.55.0
