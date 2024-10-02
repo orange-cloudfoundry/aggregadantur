@@ -11,7 +11,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/onsi/ginkgo/v2 v2.20.2
 	github.com/onsi/gomega v1.34.2
-	github.com/prometheus/common v0.59.1
+	github.com/prometheus/common v0.60.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/vulcand/oxy v1.4.2
 	golang.org/x/text v0.18.0
@@ -31,8 +31,8 @@ require (
 	github.com/mailgun/multibuf v0.2.0 // indirect
 	github.com/vulcand/predicate v1.2.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/net v0.28.0 // indirect
-	golang.org/x/sys v0.24.0 // indirect
+	golang.org/x/net v0.29.0 // indirect
+	golang.org/x/sys v0.25.0 // indirect
 	golang.org/x/tools v0.24.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
