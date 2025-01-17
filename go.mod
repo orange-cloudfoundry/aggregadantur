@@ -10,7 +10,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/onsi/ginkgo/v2 v2.22.2
 	github.com/onsi/gomega v1.36.2
-	github.com/prometheus/common v0.61.0
+	github.com/prometheus/common v0.62.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/vulcand/oxy v1.4.2
 	golang.org/x/text v0.21.0
