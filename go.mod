@@ -5,7 +5,7 @@ go 1.23.4
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
 	github.com/gobwas/glob v0.2.3
-	github.com/golang-jwt/jwt/v4 v4.5.1
+	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/gorilla/mux v1.8.1
 	github.com/gorilla/sessions v1.4.0
 	github.com/onsi/ginkgo/v2 v2.23.3
