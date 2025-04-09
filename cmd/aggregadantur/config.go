@@ -4,10 +4,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"os"
+
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
-	"os"
 )
 
 type Log struct {
@@ -96,21 +97,21 @@ type TLSPem struct {
 func (x *TLSPem) CertificateAndPool() (tls.Certificate, *x509.CertPool, error) {
 	certificate, err := tls.X509KeyPair([]byte(x.CertChain), []byte(x.PrivateKey))
 	if err != nil {
-		errMsg := fmt.Sprintf("Error loading key pair: %s", err.Error())
-		return tls.Certificate{}, nil, fmt.Errorf(errMsg)
+		errMsg := fmt.Errorf("error loading key pair: %s", err.Error())
+		return tls.Certificate{}, nil, errMsg
 	}
 	certPool, err := x509.SystemCertPool()
 	if err != nil {
-		errMsg := fmt.Sprintf("Error loading system cert pool: %s", err.Error())
-		return tls.Certificate{}, nil, fmt.Errorf(errMsg)
+		errMsg := fmt.Errorf("error loading system cert pool: %s", err.Error())
+		return tls.Certificate{}, nil, errMsg
 	}
 	if x.CA == "" {
 		if ok := certPool.AppendCertsFromPEM([]byte(x.CertChain)); !ok {
-			return tls.Certificate{}, nil, fmt.Errorf("Error while adding CACerts cert pool: \n%s\n", x.CertChain)
+			return tls.Certificate{}, nil, fmt.Errorf("error while adding CACerts cert pool: %s", x.CertChain)
 		}
 	} else {
 		if ok := certPool.AppendCertsFromPEM([]byte(x.CA)); !ok {
-			return tls.Certificate{}, nil, fmt.Errorf("Error while adding CACerts cert pool: \n%s\n", x.CA)
+			return tls.Certificate{}, nil, fmt.Errorf("error while adding CACerts cert pool: %s", x.CA)
 		}
 	}
 	return certificate, certPool, nil

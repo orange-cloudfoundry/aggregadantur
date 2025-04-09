@@ -141,5 +141,5 @@ func (es JWTChecks) FindJWTCheckByIssuer(issuer string) (JWTCheck, error) {
 			return e, nil
 		}
 	}
-	return JWTCheck{}, fmt.Errorf("Jwt check with issuer %s not found", issuer)
+	return JWTCheck{}, fmt.Errorf("jwt check with issuer %s not found", issuer)
 }

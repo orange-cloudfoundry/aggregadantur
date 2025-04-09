@@ -11,6 +11,7 @@ import (
 
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
+	"github.com/orange-cloudfoundry/aggregadantur/utils"
 )
 
 type AggregateHandler struct {
@@ -166,7 +167,7 @@ func (a AggregateHandler) aggregateFromEndpoint(reqEndpoint *http.Request, endpo
 		return
 	}
 
-	defer resp.Body.Close()
+	defer utils.CloseAndLogError(resp.Body)
 	b, err := io.ReadAll(resp.Body)
 	if err != nil {
 		// 2.

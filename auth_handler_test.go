@@ -1,17 +1,18 @@
 package aggregadantur_test
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"net/url"
+	"strings"
+	"time"
+
 	"github.com/gorilla/sessions"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"github.com/orange-cloudfoundry/aggregadantur/testhelper"
-	"net/http"
-	"net/http/httptest"
-	"net/url"
-	"strings"
-	"time"
 
 	"github.com/orange-cloudfoundry/aggregadantur"
 )
@@ -151,7 +152,10 @@ var _ = Describe("AuthHandler", func() {
 					req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 					packAuth.handler.SetFn(func(w http.ResponseWriter, req *http.Request) bool {
 						w.WriteHeader(http.StatusUnauthorized)
-						w.Write([]byte("user doesn't exists"))
+						_, err := w.Write([]byte("user doesn't exists"))
+						if err != nil {
+							panic(err)
+						}
 						return true
 					})
 

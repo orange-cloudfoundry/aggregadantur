@@ -3,15 +3,16 @@ package aggregadantur
 import (
 	"crypto/tls"
 	"fmt"
+	"net"
+	"net/http"
+	"strings"
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/gorilla/sessions"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	log "github.com/sirupsen/logrus"
 	"github.com/vulcand/oxy/trace"
-	"net"
-	"net/http"
-	"strings"
-	"time"
 )
 
 type Router struct {
@@ -70,7 +71,7 @@ func (r Router) AddMuxRoutes(routes ...*models.AggregateRoute) error {
 	for _, route := range routes {
 		err := r.AddMuxRoute(route)
 		if err != nil {
-			return fmt.Errorf("Error when adding route %s: %s", route.Name, err.Error())
+			return fmt.Errorf("error when adding route %s: %s", route.Name, err.Error())
 		}
 	}
 	return nil

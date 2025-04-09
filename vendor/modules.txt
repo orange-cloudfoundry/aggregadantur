@@ -46,8 +46,8 @@ github.com/gorilla/sessions
 # github.com/gorilla/websocket v1.5.3
 ## explicit; go 1.12
 github.com/gorilla/websocket
-# github.com/gravitational/trace v1.4.0
-## explicit; go 1.15
+# github.com/gravitational/trace v1.5.1
+## explicit; go 1.23.7
 github.com/gravitational/trace
 github.com/gravitational/trace/internal
 # github.com/kr/pretty v0.3.1
@@ -103,8 +103,8 @@ github.com/vulcand/oxy/forward
 github.com/vulcand/oxy/internal/holsterv4/clock
 github.com/vulcand/oxy/trace
 github.com/vulcand/oxy/utils
-# github.com/vulcand/predicate v1.2.0
-## explicit; go 1.16
+# github.com/vulcand/predicate v1.3.0
+## explicit; go 1.19
 github.com/vulcand/predicate
 # github.com/xhit/go-str2duration/v2 v2.1.0
 ## explicit; go 1.13
@@ -115,7 +115,7 @@ go.uber.org/automaxprocs
 go.uber.org/automaxprocs/internal/cgroups
 go.uber.org/automaxprocs/internal/runtime
 go.uber.org/automaxprocs/maxprocs
-# golang.org/x/net v0.37.0
+# golang.org/x/net v0.39.0
 ## explicit; go 1.23.0
 golang.org/x/net/context
 golang.org/x/net/html

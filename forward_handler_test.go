@@ -2,16 +2,17 @@ package aggregadantur_test
 
 import (
 	"bytes"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"os"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/orange-cloudfoundry/aggregadantur"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"github.com/orange-cloudfoundry/aggregadantur/testhelper"
 	log "github.com/sirupsen/logrus"
-	"io"
-	"net/http"
-	"net/http/httptest"
-	"os"
 )
 
 var _ = Describe("ForwardHandler", func() {
@@ -54,11 +55,17 @@ var _ = Describe("ForwardHandler", func() {
 				nbTry += 1
 				if nbTry == 2 {
 					w.WriteHeader(http.StatusCreated)
-					w.Write([]byte("good"))
+					_, err := w.Write([]byte("good"))
+					if err != nil {
+						panic(err)
+					}
 					return true
 				}
 				w.WriteHeader(http.StatusBadGateway)
-				w.Write([]byte("bad"))
+				_, err := w.Write([]byte("bad"))
+				if err != nil {
+					panic(err)
+				}
 				return true
 			})
 
@@ -78,11 +85,17 @@ var _ = Describe("ForwardHandler", func() {
 					nbTry += 1
 					if nbTry == 2 {
 						w.WriteHeader(http.StatusCreated)
-						w.Write([]byte("good"))
+						_, err := w.Write([]byte("good"))
+						if err != nil {
+							panic(err)
+						}
 						return true
 					}
 					w.WriteHeader(http.StatusBadGateway)
-					w.Write([]byte("bad"))
+					_, err := w.Write([]byte("bad"))
+					if err != nil {
+						panic(err)
+					}
 					return true
 				})
 
