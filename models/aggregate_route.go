@@ -171,10 +171,10 @@ func (r *AggregateRoute) UnmarshalYAML(unmarshal func(interface{}) error) error 
 }
 
 func (r *AggregateRoute) Load() error {
-	if r.Hosts == nil || len(r.Hosts) == 0 {
+	if len(r.Hosts) == 0 {
 		r.Hosts = HostMatchers{NewHostMatcher("*")}
 	}
-	if r.AllowedMethods == nil || len(r.AllowedMethods) == 0 {
+	if len(r.AllowedMethods) == 0 {
 		r.AllowedMethods = []string{http.MethodGet}
 	}
 
@@ -183,14 +183,14 @@ func (r *AggregateRoute) Load() error {
 
 func (r *AggregateRoute) Check() error {
 	if r.Name == "" {
-		return fmt.Errorf("You must provide a name to your routes")
+		return fmt.Errorf("you must provide a name to your routes")
 	}
 	if r.Identifier == "" {
-		return fmt.Errorf("You must provide an identifier to your routes")
+		return fmt.Errorf("you must provide an identifier to your routes")
 	}
 
 	if r.Upstream != nil && r.Upstream.URL != nil && r.Upstream.URL.Scheme == "" {
-		return fmt.Errorf("Invalid URL : scheme is missing")
+		return fmt.Errorf("invalid URL : scheme is missing")
 	}
 	if r.Path == "" {
 		r.Path = "/"

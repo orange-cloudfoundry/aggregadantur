@@ -6,6 +6,11 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"strings"
+
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/sessions"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
@@ -13,10 +18,6 @@ import (
 	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
 )
 
 type AuthHandler struct {
@@ -136,11 +137,14 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 	}
 	if req.Method == http.MethodGet {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(makeLoginPageHtml(
+		_, err := w.Write([]byte(makeLoginPageHtml(
 			loginPageTemplate,
 			cases.Title(language.AmericanEnglish).String(a.aggrRoute.Name),
 			redirectUrl,
 		)))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 	err = req.ParseForm()
@@ -151,9 +155,12 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 	authToken, err := a.oauth2Auth(req)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte(fmt.Sprintf(
+		_, err := w.Write(fmt.Appendf(nil,
 			`<html><head><meta http-equiv="refresh" content="3;url=%s" /></head><body><h1>You are not authorized: %s.</h1></body></html>`,
-			req.URL.Path, err.Error())))
+			req.URL.Path, err.Error()))
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -273,7 +280,7 @@ func (a AuthHandler) oauth2Auth(origReq *http.Request) (AccessTokenResponse, err
 		}
 	}
 
-	return AccessTokenResponse{}, fmt.Errorf("you have no valid scopes.")
+	return AccessTokenResponse{}, fmt.Errorf("you have no valid scopes")
 }
 
 func (a AuthHandler) generateFormBody(user, password string) (io.Reader, string) {
@@ -310,7 +317,7 @@ func checkTokenfunc(token *jwt.Token, jwtCheck models.JWTCheck, signingMethod jw
 	}
 
 	if jwtCheck.Issuer != "" && !mapClaims.VerifyIssuer(jwtCheck.Issuer, true) {
-		return nil, fmt.Errorf("Token doesn't contains the requested issuer.")
+		return nil, fmt.Errorf("token doesn't contains the requested issuer")
 	}
 	return getSecretEncoded(jwtCheck.Secret, signingMethod)
 }

@@ -3,13 +3,14 @@ package aggregadantur_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/golang-jwt/jwt/v4"
-	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
-	"github.com/orange-cloudfoundry/aggregadantur/models"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
+	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
+	"github.com/orange-cloudfoundry/aggregadantur/models"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -175,7 +176,10 @@ func (t TestHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(t.status)
-	w.Write(t.content.Bytes())
+	_, err := w.Write(t.content.Bytes())
+	if err != nil {
+		panic(err)
+	}
 }
 
 func RespRecordToAggrEndpoint(respRecorder *httptest.ResponseRecorder) models.AggregateEndpoint {
