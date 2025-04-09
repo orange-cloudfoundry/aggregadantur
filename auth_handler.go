@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
+	"html"
 	"io"
 	"net/http"
 	"net/url"
@@ -157,7 +158,7 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, err := w.Write(fmt.Appendf(nil,
 			`<html><head><meta http-equiv="refresh" content="3;url=%s" /></head><body><h1>You are not authorized: %s.</h1></body></html>`,
-			req.URL.Path, err.Error()))
+			html.EscapeString(req.URL.Path), html.EscapeString(err.Error())))
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
