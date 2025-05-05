@@ -1,1 +1,1 @@
-{"project_name":"aggregadantur","tag":"v1.80.1","previous_tag":"v1.80.0","version":"1.80.1-SNAPSHOT-a079ae9","commit":"a079ae9f33618554a568b502fc83ca85cd7657a7","date":"2024-12-16T09:02:22.75502712+01:00","runtime":{"goos":"linux","goarch":"amd64"}}
+{"project_name":"aggregadantur","tag":"v1.91.0","previous_tag":"v1.90.1","version":"1.91.0","commit":"2cbe624a1f520f1e6054f0bed0c27ba5f5aeeb41","date":"2025-05-05T17:04:03.876169608+02:00","runtime":{"goos":"linux","goarch":"amd64"}}

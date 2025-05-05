@@ -3,9 +3,6 @@ release:
   github:
     owner: orange-cloudfoundry
     name: aggregadantur
-  gitlab:
-    owner: orange-cloudfoundry
-    name: aggregadantur
   prerelease: auto
   name_template: '{{.Tag}}'
 builds:
@@ -15,20 +12,12 @@ builds:
       - darwin
     goarch:
       - amd64
-    goamd64:
-      - v1
-    go386:
-      - sse2
     goarm:
       - "6"
-    goarm64:
-      - v8.0
     gomips:
       - hardfloat
-    goppc64:
-      - power8
-    goriscv64:
-      - rva20u64
+    goamd64:
+      - v1
     targets:
       - linux_amd64_v1
       - darwin_amd64_v1
@@ -64,7 +53,7 @@ archives:
       - src: static/*
       - src: templates/*
 snapshot:
-  version_template: '{{ .Version }}-SNAPSHOT-{{ .ShortCommit }}'
+  name_template: '{{ .Version }}-SNAPSHOT-{{ .ShortCommit }}'
 checksum:
   name_template: checksums.txt
   algorithm: sha256
