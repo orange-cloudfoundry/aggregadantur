@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/common v0.65.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/vulcand/oxy v1.4.2
-	golang.org/x/text v0.26.0
+	golang.org/x/text v0.27.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
@@ -31,8 +31,8 @@ require (
 	github.com/vulcand/predicate v1.3.0 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
 	go.uber.org/automaxprocs v1.6.0 // indirect
-	golang.org/x/net v0.40.0 // indirect
+	golang.org/x/net v0.41.0 // indirect
 	golang.org/x/sys v0.33.0 // indirect
-	golang.org/x/tools v0.33.0 // indirect
+	golang.org/x/tools v0.34.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
