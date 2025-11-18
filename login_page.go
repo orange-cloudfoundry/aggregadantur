@@ -375,5 +375,5 @@ const DefaultOIDCLoginTemplate = `<!DOCTYPE html>
 func makeLoginPageHtml(template, name, path string) string {
 	template = strings.ReplaceAll(template, "((title))", html.EscapeString(name))
 	template = strings.ReplaceAll(template, "((redirect_url))", html.EscapeString(path))
-	return fmt.Sprintf(template, name, path)
+	return fmt.Sprintf(template, html.EscapeString(name), html.EscapeString(path))
 }

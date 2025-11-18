@@ -340,7 +340,7 @@ func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *ht
 
 	whichScope := ""
 	var scopes []string
-	if len(a.aggrRoute.Auth.OIDCAuth.Scopes) != 0 {
+	if a.aggrRoute.Auth.OIDCAuth != nil {
 		scopes = a.aggrRoute.Auth.OIDCAuth.Scopes
 	} else {
 		scopes = a.aggrRoute.Auth.Oauth2Auth.Scopes
