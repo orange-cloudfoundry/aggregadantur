@@ -141,7 +141,7 @@ func VerifyState(state string, savedState string) (bool, error) {
 	}
 
 	if savedState == "" {
-		return false, fmt.Errorf("No authentication session found")
+		return false, fmt.Errorf("no authentication session found")
 	}
 
 	if len(state) != len(savedState) {
@@ -160,7 +160,7 @@ func VerifyNonce(nonce string, savedNonce string) (bool, error) {
 		return false, fmt.Errorf("nonce parameter not found")
 	}
 	if savedNonce == "" {
-		return false, fmt.Errorf("No authentication session found")
+		return false, fmt.Errorf("no authentication session found")
 	}
 	if subtle.ConstantTimeCompare([]byte(nonce), []byte(savedNonce)) != 1 {
 		return false, fmt.Errorf("nonce did not match")
