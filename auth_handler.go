@@ -2,39 +2,76 @@ package aggregadantur
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"crypto/subtle"
 	"encoding/json"
 	"fmt"
 	"html"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
+	"time"
 
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/gorilla/sessions"
 	"github.com/orange-cloudfoundry/aggregadantur/contexes"
 	"github.com/orange-cloudfoundry/aggregadantur/jwtclaim"
 	"github.com/orange-cloudfoundry/aggregadantur/models"
+	"golang.org/x/oauth2"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
 
 type AuthHandler struct {
-	next       http.Handler
-	aggrRoute  *models.AggregateRoute
-	httpClient *http.Client
-	store      sessions.Store
+	next         http.Handler
+	aggrRoute    *models.AggregateRoute
+	httpClient   *http.Client
+	store        sessions.Store
+	oidcProvider *oidc.Provider
+	oauth2Config *oauth2.Config
+	oidcVerifier *oidc.IDTokenVerifier
 }
 
 func NewAuthHandler(next http.Handler, aggrRoute *models.AggregateRoute, httpClient *http.Client, store sessions.Store) *AuthHandler {
-	return &AuthHandler{
+	handler := &AuthHandler{
 		next:       next,
 		aggrRoute:  aggrRoute,
 		httpClient: httpClient,
 		store:      store,
 	}
+
+	// Initialize OIDC provider if configured
+	if aggrRoute.Auth.OIDCAuth != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+		defer cancel()
+		ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
+		provider, err := oidc.NewProvider(ctx, aggrRoute.Auth.OIDCAuth.Endpoint)
+		if err != nil {
+			panic(fmt.Errorf("failed to create OIDC provider: %w", err))
+		}
+		handler.oidcProvider = provider
+
+		handler.oauth2Config = &oauth2.Config{
+			ClientID:     aggrRoute.Auth.OIDCAuth.ClientID,
+			ClientSecret: aggrRoute.Auth.OIDCAuth.ClientSecret,
+			RedirectURL:  aggrRoute.Auth.OIDCAuth.RedirectURI,
+			Endpoint:     provider.Endpoint(),
+			Scopes:       aggrRoute.Auth.OIDCAuth.Scopes,
+		}
+
+		handler.oidcVerifier = provider.Verifier(&oidc.Config{
+			ClientID: aggrRoute.Auth.OIDCAuth.ClientID,
+		})
+
+	}
+
+	return handler
+
 }
 
 func (a AuthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
@@ -46,6 +83,15 @@ func (a AuthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		a.next.ServeHTTP(w, req)
 		return
 	}
+	if a.aggrRoute.Auth.OIDCAuth != nil && req.URL.Path == a.aggrRoute.Auth.OIDCAuth.AuthPath {
+		a.redirectToOIDC(w, req)
+		return
+	}
+
+	if a.aggrRoute.Auth.OIDCAuth != nil && req.URL.Path == a.aggrRoute.Auth.OIDCAuth.CallbackPath {
+		a.handleOIDCCallback(w, req)
+		return
+	}
 
 	_, _, hasBasicAuth := req.BasicAuth()
 	if a.aggrRoute.Auth.BasicAuth != nil || hasBasicAuth {
@@ -54,10 +100,223 @@ func (a AuthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	jwtToken := a.retrieveJwt(req)
 	if jwtToken == "" {
-		a.loginPage(w, req)
-		return
+		if a.aggrRoute.Auth.OIDCAuth != nil {
+			a.oidcLoginPage(w, req)
+			return
+		} else {
+			a.loginPage(w, req)
+			return
+		}
 	}
 	a.checkJwt(jwtToken, w, req)
+}
+
+func (a AuthHandler) redirectToOIDC(w http.ResponseWriter, req *http.Request) {
+	session, err := a.getSession(req)
+	if err != nil {
+		log.Printf("Failed to get session: %v", err)
+	}
+
+	codeVerifier := models.GenerateCodeVerifier()
+	codeChallenge := models.GenerateCodeChallenge(codeVerifier)
+	session.Values["code_verifier"] = codeVerifier
+
+	state := models.GenerateState()
+	nonce := models.GenerateState()
+
+	if state == "" || nonce == "" {
+		http.Error(w, "Failed to generate security tokens", http.StatusInternalServerError)
+		return
+	}
+
+	session.Values["state"] = state
+	session.Values["nonce"] = nonce
+	session.Values["state_created_at"] = time.Now().Unix()
+
+	err = session.Save(req, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	authUrl := a.oauth2Config.AuthCodeURL(
+		state,
+		oauth2.SetAuthURLParam("code_challenge", codeChallenge),
+		oauth2.SetAuthURLParam("code_challenge_method", "S256"),
+		oauth2.SetAuthURLParam("nonce", nonce),
+	)
+
+	http.Redirect(w, req, authUrl, http.StatusTemporaryRedirect)
+
+}
+
+func (a AuthHandler) handleOIDCCallback(w http.ResponseWriter, req *http.Request) {
+	if errParam := req.URL.Query().Get("error"); errParam != "" {
+		errDesc := req.URL.Query().Get("error_description")
+		http.Error(w, fmt.Sprintf("OAuth error: %s - %s", errParam, errDesc), http.StatusBadRequest)
+		return
+	}
+
+	session, err := a.getSession(req)
+	if err != nil {
+		log.Printf("Failed to get session: %v", err)
+	}
+
+	if createdAt, ok := session.Values["state_created_at"].(int64); ok {
+		if time.Now().Unix()-createdAt > 180 {
+			http.Error(w, "Authentication session expired", http.StatusBadRequest)
+			return
+		}
+	}
+
+	state := req.URL.Query().Get("state")
+	savedState, ok := session.Values["state"].(string)
+
+	validState, err := jwtclaim.VerifyState(state, savedState)
+	if err != nil || !validState || !ok {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	code := req.URL.Query().Get("code")
+	if code == "" {
+		http.Error(w, "code not found", http.StatusBadRequest)
+		return
+	}
+
+	if usedCode, ok := session.Values["used_code"].(string); ok && usedCode == code {
+		http.Error(w, "Authorization code already used", http.StatusBadRequest)
+		return
+	}
+
+	session.Values["used_code"] = code
+	err = session.Save(req, w)
+	if err != nil {
+		log.Printf("Failed to save session: %v", err)
+	}
+
+	codeVerifier, ok := session.Values["code_verifier"].(string)
+	if !ok || codeVerifier == "" {
+		http.Error(w, "Authentication session not found or expired", http.StatusBadRequest)
+		return
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	oauth2Token, err := a.oauth2Config.Exchange(ctx, code, oauth2.SetAuthURLParam("code_verifier", codeVerifier))
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to exchange code: %s", err.Error()), http.StatusInternalServerError)
+		return
+	}
+	rawIDToken, ok := oauth2Token.Extra("id_token").(string)
+	if !ok {
+		http.Error(w, "No id_token field in oauth2 token.", http.StatusInternalServerError)
+		return
+	}
+	idToken, err := a.oidcVerifier.Verify(ctx, rawIDToken)
+	if err != nil {
+		http.Error(w, "Failed to verify ID Token: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if !oauth2Token.Expiry.IsZero() {
+		session.Options.MaxAge = int(time.Until(oauth2Token.Expiry).Seconds())
+	}
+
+	validAudience := false
+	validAudience = jwtclaim.VerifyAud(idToken.Audience, a.aggrRoute.Auth.OIDCAuth.ClientID, true)
+
+	if !validAudience {
+		http.Error(w, "Invalid audience in ID token", http.StatusBadRequest)
+		return
+	}
+
+	validIssuer := jwtclaim.VerifyIss(idToken.Issuer, a.aggrRoute.Auth.OIDCAuth.Issuer, false)
+	if !validIssuer {
+		http.Error(w, "Invalid issuer in ID token", http.StatusBadRequest)
+		return
+	}
+
+	nonce, ok := session.Values["nonce"].(string)
+	validNonce, err := jwtclaim.VerifyNonce(idToken.Nonce, nonce)
+	if err != nil || !validNonce || !ok {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp := struct {
+		OAuth2Token   *oauth2.Token
+		IDTokenClaims *json.RawMessage // ID Token payload is just JSON.
+	}{oauth2Token, new(json.RawMessage)}
+
+	if err := idToken.Claims(&resp.IDTokenClaims); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	var userInfo models.OIDCIdToken
+	err = json.Unmarshal(*resp.IDTokenClaims, &userInfo)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if userInfo.Sub == "" {
+		http.Error(w, "Missing subject claim", http.StatusBadRequest)
+		return
+	}
+	if userInfo.Email == "" {
+		http.Error(w, "Email not found or not verified", http.StatusBadRequest)
+		return
+	}
+
+	delete(session.Values, "used_code")
+	delete(session.Values, "code_verifier")
+	delete(session.Values, "state")
+	delete(session.Values, "nonce")
+	delete(session.Values, "state_created_at")
+
+	// Get original redirect URL
+	redirectUrl := "/"
+	if r, ok := session.Values["redirect_after_login"]; ok {
+		redirectUrl = r.(string)
+		delete(session.Values, "redirect_after_login")
+	}
+
+	session.Options.MaxAge = -1
+	err = session.Save(req, w)
+	if err != nil {
+		log.Printf("Failed to invalidate old session: %v", err)
+	}
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth-" + a.aggrRoute.Name,
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteLaxMode,
+	})
+
+	newSession, err := a.getSession(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	newSession.Values["jwt_token"] = oauth2Token.AccessToken
+
+	if !oauth2Token.Expiry.IsZero() {
+		newSession.Options.MaxAge = int(time.Until(oauth2Token.Expiry).Seconds())
+	}
+	err = session.Save(req, w)
+	if err != nil {
+		log.Printf("Failed to save session: %v", err)
+	}
+
+	http.Redirect(w, req, redirectUrl, http.StatusFound)
 }
 
 func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *http.Request) {
@@ -80,7 +339,13 @@ func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *ht
 	}
 
 	whichScope := ""
-	for _, scopeByPriorities := range a.aggrRoute.Auth.Oauth2Auth.Scopes {
+	var scopes []string
+	if len(a.aggrRoute.Auth.OIDCAuth.Scopes) != 0 {
+		scopes = a.aggrRoute.Auth.OIDCAuth.Scopes
+	} else {
+		scopes = a.aggrRoute.Auth.Oauth2Auth.Scopes
+	}
+	for _, scopeByPriorities := range scopes {
 		for _, scope := range claim.Scope {
 			if scope == scopeByPriorities {
 				whichScope = scope
@@ -111,7 +376,12 @@ func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *ht
 }
 
 func (a AuthHandler) retrieveJwt(req *http.Request) string {
-	session := a.getSession(req)
+	session, err := a.getSession(req)
+	if err != nil {
+		//log the error and continue to check Authorization header
+		log.Printf("Failed to get session: %v", err)
+	}
+
 	if j, ok := session.Values["jwt_token"]; ok {
 		return j.(string)
 	}
@@ -123,20 +393,69 @@ func (a AuthHandler) retrieveJwt(req *http.Request) string {
 	return ""
 }
 
-func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
-	redirectUrl := req.URL.Path
-	if redirectUrl == "" {
-		redirectUrl = "/"
+func (a AuthHandler) oidcLoginPage(w http.ResponseWriter, req *http.Request) {
+	session, err := a.getSession(req)
+	if err != nil {
+		log.Printf("Failed to get session: %v", err)
 	}
+
+	redirectUrl := req.URL.Path
 	if req.URL.RawQuery != "" {
 		redirectUrl += "?" + req.URL.RawQuery
 	}
+	redirectUrl = a.sanitizeRedirectUrl(redirectUrl)
+
+	session.Values["redirect_after_login"] = redirectUrl
+	err = session.Save(req, w)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if req.Method == http.MethodPost {
+		http.Redirect(w, req, a.aggrRoute.Auth.OIDCAuth.AuthPath, http.StatusFound)
+		return
+	}
+
+	loginPageTemplate, err := a.aggrRoute.Auth.MakeLoginPageTemplate(DefaultOIDCLoginTemplate)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	w.Header().Set("X-Frame-Options", "DENY")
+
+	_, err = w.Write([]byte(makeLoginPageHtml(
+		loginPageTemplate,
+		cases.Title(language.AmericanEnglish).String(a.aggrRoute.Name),
+		redirectUrl,
+	)))
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
+	redirectUrl := req.URL.Path
+	if req.URL.RawQuery != "" {
+		redirectUrl += "?" + req.URL.RawQuery
+	}
+	redirectUrl = a.sanitizeRedirectUrl(redirectUrl)
 	loginPageTemplate, err := a.aggrRoute.Auth.MakeLoginPageTemplate(DefaultLoginTemplate)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
 	if req.Method == http.MethodGet {
+
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Header().Set("X-Content-Type-Options", "nosniff")
+		w.Header().Set("X-Frame-Options", "DENY")
+
 		w.WriteHeader(http.StatusUnauthorized)
 		_, err := w.Write([]byte(makeLoginPageHtml(
 			loginPageTemplate,
@@ -165,7 +484,11 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	session := a.getSession(req)
+	session, err := a.getSession(req)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	session.Values["jwt_token"] = authToken.AccessToken
 	session.Options.MaxAge = authToken.ExpiresIn
 	err = session.Save(req, w)
@@ -179,9 +502,12 @@ func (a AuthHandler) loginPage(w http.ResponseWriter, req *http.Request) {
 	http.Redirect(w, req, redirectUrl, http.StatusTemporaryRedirect)
 }
 
-func (a AuthHandler) getSession(req *http.Request) *sessions.Session {
-	session, _ := a.store.Get(req, "auth-"+a.aggrRoute.Name)
-	return session
+func (a AuthHandler) getSession(req *http.Request) (*sessions.Session, error) {
+	session, err := a.store.Get(req, "auth-"+a.aggrRoute.Name)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session: %w", err)
+	}
+	return session, nil
 }
 
 func (a AuthHandler) basicAuth(w http.ResponseWriter, req *http.Request) {
@@ -341,4 +667,35 @@ func getSecretEncoded(secret string, signingMethod jwt.SigningMethod) (interface
 		return encSecret, nil
 	}
 	return jwt.ParseRSAPrivateKeyFromPEM(bSecret)
+}
+
+func (a AuthHandler) sanitizeRedirectUrl(redirectUrl string) string {
+	redirectUrl = strings.TrimSpace(redirectUrl)
+
+	if redirectUrl == "" {
+		return "/"
+	}
+
+	parsed, err := url.Parse(redirectUrl)
+	if err != nil {
+		return "/"
+	}
+	if parsed.Scheme != "" || parsed.Host != "" {
+		return "/"
+	}
+
+	lower := strings.ToLower(parsed.Path)
+	if strings.HasPrefix(lower, "javascript:") ||
+		strings.HasPrefix(lower, "data:") ||
+		strings.HasPrefix(lower, "vbscript:") {
+		return "/"
+	}
+
+	if !strings.HasPrefix(parsed.Path, "/") {
+		parsed.Path = "/" + parsed.Path
+	}
+
+	parsed.Path = path.Clean(parsed.Path)
+
+	return parsed.RequestURI()
 }

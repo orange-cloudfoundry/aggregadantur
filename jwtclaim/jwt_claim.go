@@ -3,8 +3,9 @@ package jwtclaim
 import (
 	"crypto/subtle"
 	"fmt"
-	"github.com/golang-jwt/jwt/v4"
 	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 type ScopeClaims struct {
@@ -51,7 +52,7 @@ func (c ScopeClaims) Valid() error {
 // VerifyAudience compares the aud claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyAudience(cmp string, req bool) bool {
-	return verifyAud(c.Audience, cmp, req)
+	return VerifyAud(c.Audience, cmp, req)
 }
 
 // VerifyExpiresAt compares the exp claim against cmp.
@@ -69,7 +70,7 @@ func (c *ScopeClaims) VerifyIssuedAt(cmp int64, req bool) bool {
 // VerifyIssuer compares the iss claim against cmp.
 // If required is false, this method will return true if the value matches or is unset
 func (c *ScopeClaims) VerifyIssuer(cmp string, req bool) bool {
-	return verifyIss(c.Issuer, cmp, req)
+	return VerifyIss(c.Issuer, cmp, req)
 }
 
 // VerifyNotBefore compares the nbf claim against cmp.
@@ -89,7 +90,7 @@ func (c *ScopeClaims) HasScope(findScope string) bool {
 
 // ----- helpers
 
-func verifyAud(aud []string, cmp string, required bool) bool {
+func VerifyAud(aud []string, cmp string, required bool) bool {
 	if len(aud) == 0 {
 		return !required
 	}
@@ -116,7 +117,7 @@ func verifyIat(iat int64, now int64, required bool) bool {
 	return now >= iat
 }
 
-func verifyIss(iss string, cmp string, required bool) bool {
+func VerifyIss(iss string, cmp string, required bool) bool {
 	if iss == "" {
 		return !required
 	}
@@ -132,4 +133,38 @@ func verifyNbf(nbf int64, now int64, required bool) bool {
 		return !required
 	}
 	return now >= nbf
+}
+
+func VerifyState(state string, savedState string) (bool, error) {
+	if state == "" {
+		return false, fmt.Errorf("state parameter not found")
+	}
+
+	if savedState == "" {
+		return false, fmt.Errorf("No authentication session found")
+	}
+
+	if len(state) != len(savedState) {
+		return false, fmt.Errorf("invalid state parameter")
+	}
+
+	if subtle.ConstantTimeCompare([]byte(state), []byte(savedState)) != 1 {
+		return false, fmt.Errorf("invalid state parameter")
+	}
+	return true, nil
+
+}
+
+func VerifyNonce(nonce string, savedNonce string) (bool, error) {
+	if nonce == "" {
+		return false, fmt.Errorf("nonce parameter not found")
+	}
+	if savedNonce == "" {
+		return false, fmt.Errorf("No authentication session found")
+	}
+	if subtle.ConstantTimeCompare([]byte(nonce), []byte(savedNonce)) != 1 {
+		return false, fmt.Errorf("nonce did not match")
+	}
+	return true, nil
+
 }
