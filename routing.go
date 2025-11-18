@@ -16,9 +16,10 @@ import (
 )
 
 type Router struct {
-	rtr    *mux.Router
-	store  sessions.Store
-	tracer bool
+	rtr            *mux.Router
+	store          sessions.Store
+	tracer         bool
+	sessionOptions *sessions.Options
 }
 
 func NewRouter(store sessions.Store) *Router {
@@ -26,7 +27,24 @@ func NewRouter(store sessions.Store) *Router {
 		rtr:    mux.NewRouter(),
 		store:  store,
 		tracer: true,
+		sessionOptions: &sessions.Options{
+			Secure:   true,
+			HttpOnly: true,
+			SameSite: http.SameSiteLaxMode,
+			MaxAge:   0,
+			Path:     "/",
+		},
 	}
+}
+
+func (r *Router) UpdateSessionOptions(options *sessions.Options) *Router {
+	if options != nil {
+		r.sessionOptions = options
+		if cookieStore, ok := r.store.(*sessions.CookieStore); ok {
+			cookieStore.Options = options
+		}
+	}
+	return r
 }
 
 func (r *Router) DisableTracer() {

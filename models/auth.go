@@ -1,6 +1,9 @@
 package models
 
 import (
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -8,6 +11,7 @@ import (
 
 func NewAuthWithOauth2(
 	oauth2Auth *Oauth2Auth,
+	oidcAuth *OIDCAuth,
 	jwtChecks JWTChecks,
 	includes, excludes PathMatchers,
 ) Auth {
@@ -15,6 +19,7 @@ func NewAuthWithOauth2(
 		Includes:   includes,
 		Excludes:   excludes,
 		Oauth2Auth: oauth2Auth,
+		OIDCAuth:   oidcAuth,
 		BasicAuth:  nil,
 		JWTCheck:   jwtChecks,
 	}
@@ -27,10 +32,22 @@ type Auth struct {
 	Excludes PathMatchers `json:"excludes" yaml:"excludes" cloud:"excludes"`
 	// Oauth2 auth
 	Oauth2Auth            *Oauth2Auth `json:"oauth2" yaml:"oauth2" cloud:"oauth2"`
+	OIDCAuth              *OIDCAuth   `json:"oidc" yaml:"oidc" cloud:"oidc"`
 	BasicAuth             *BasicAuth  `json:"basic_auth" yaml:"basic" cloud:"basic_auth"`
 	JWTCheck              JWTChecks   `json:"jwt_checks" yaml:"jwt_checks" cloud:"jwt_checks"`
 	LoginPageTemplate     string      `json:"login_page_template" yaml:"login_page_template" cloud:"login_page_template"`
 	LoginPageTemplatePath string      `json:"login_page_template_path" yaml:"login_page_template_path" cloud:"login_page_template_path"`
+}
+
+type OIDCIdToken struct {
+	Email         string `json:"email"`
+	FamilyName    string `json:"family_name"`
+	GivenName     string `json:"given_name"`
+	PreferredName string `json:"preferred_username"`
+	Name          string `json:"name"`
+	EmailVerified bool   `json:"email_verified"`
+	Sub           string `json:"sub"`
+	Type          string `json:"typ"`
 }
 
 func (a Auth) MakeLoginPageTemplate(defaultTemplate string) (string, error) {
@@ -56,6 +73,16 @@ type Oauth2Auth struct {
 	TokenFormat  string   `json:"token_format" yaml:"token_format" cloud:"token_format"`
 	Scopes       []string `json:"scopes" yaml:"scopes" cloud:"scopes"`
 }
+type OIDCAuth struct {
+	ClientID     string   `json:"client_id" yaml:"client_id" cloud:"client_id"`
+	ClientSecret string   `json:"client_secret" yaml:"client_secret" cloud:"client_secret"`
+	Issuer       string   `json:"issuer" yaml:"issuer" cloud:"issuer"`
+	Scopes       []string `json:"scopes" yaml:"scopes" cloud:"scopes"`
+	RedirectURI  string   `json:"redirect_uri" yaml:"redirect_uri" cloud:"redirect_uri"`
+	Endpoint     string   `json:"endpoint" yaml:"endpoint" cloud:"endpoint"`
+	AuthPath     string   `json:"auth_path" yaml:"auth_path" cloud:"auth_path"`
+	CallbackPath string   `json:"callback_path" yaml:"callback_path" cloud:"callback_path"`
+}
 
 func NewOauth2Auth(
 	tokenURL string,
@@ -71,6 +98,30 @@ func NewOauth2Auth(
 		TokenFormat:  "jwt",
 		Scopes:       scopes,
 	}
+}
+
+func GenerateState() string {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(fmt.Errorf("failed to generate random state: %w", err))
+	}
+	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+func GenerateCodeVerifier() string {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(fmt.Errorf("failed to generate code verifier: %w", err))
+	}
+	return base64.RawURLEncoding.EncodeToString(b)
+}
+
+func GenerateCodeChallenge(verifier string) string {
+	h := sha256.New()
+	h.Write([]byte(verifier))
+	return base64.RawURLEncoding.EncodeToString(h.Sum(nil))
 }
 
 func (c *Oauth2Auth) Load() error {
