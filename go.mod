@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/coreos/go-oidc/v3 v3.16.0
+	github.com/coreos/go-oidc/v3 v3.17.0
 	github.com/gobwas/glob v0.2.3
 	github.com/golang-jwt/jwt/v4 v4.5.2
 	github.com/gorilla/mux v1.8.1
