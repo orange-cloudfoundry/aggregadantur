@@ -46,7 +46,7 @@ func NewAuthHandler(next http.Handler, aggrRoute *models.AggregateRoute, httpCli
 	}
 
 	// Initialize OIDC provider if configured
-	if aggrRoute.Auth.OIDCAuth != nil {
+	if aggrRoute.Auth.OIDCAuth.Endpoint != "" {
 		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 		ctx = context.WithValue(ctx, oauth2.HTTPClient, httpClient)
@@ -83,12 +83,12 @@ func (a AuthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 		a.next.ServeHTTP(w, req)
 		return
 	}
-	if a.aggrRoute.Auth.OIDCAuth != nil && req.URL.Path == a.aggrRoute.Auth.OIDCAuth.AuthPath {
+	if a.aggrRoute.Auth.OIDCAuth.Endpoint != "" && req.URL.Path == a.aggrRoute.Auth.OIDCAuth.AuthPath {
 		a.redirectToOIDC(w, req)
 		return
 	}
 
-	if a.aggrRoute.Auth.OIDCAuth != nil && req.URL.Path == a.aggrRoute.Auth.OIDCAuth.CallbackPath {
+	if a.aggrRoute.Auth.OIDCAuth.Endpoint != "" && req.URL.Path == a.aggrRoute.Auth.OIDCAuth.CallbackPath {
 		a.handleOIDCCallback(w, req)
 		return
 	}
@@ -100,7 +100,7 @@ func (a AuthHandler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 	jwtToken := a.retrieveJwt(req)
 	if jwtToken == "" {
-		if a.aggrRoute.Auth.OIDCAuth != nil {
+		if a.aggrRoute.Auth.OIDCAuth.Endpoint != "" {
 			a.oidcLoginPage(w, req)
 			return
 		} else {
