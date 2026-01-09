@@ -64,7 +64,7 @@ github.com/gravitational/trace/internal
 # github.com/mailgun/multibuf v0.2.0
 ## explicit; go 1.17
 github.com/mailgun/multibuf
-# github.com/onsi/ginkgo/v2 v2.27.3
+# github.com/onsi/ginkgo/v2 v2.27.4
 ## explicit; go 1.23.0
 github.com/onsi/ginkgo/v2
 github.com/onsi/ginkgo/v2/config
