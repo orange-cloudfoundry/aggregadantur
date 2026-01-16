@@ -12,7 +12,7 @@ require (
 	github.com/onsi/ginkgo/v2 v2.27.5
 	github.com/onsi/gomega v1.39.0
 	github.com/prometheus/common v0.67.5
-	github.com/sirupsen/logrus v1.9.3
+	github.com/sirupsen/logrus v1.9.4
 	github.com/vulcand/oxy v1.4.2
 	golang.org/x/oauth2 v0.34.0
 	golang.org/x/text v0.33.0
