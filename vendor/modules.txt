@@ -104,8 +104,8 @@ github.com/onsi/gomega/types
 # github.com/prometheus/common v0.67.5
 ## explicit; go 1.24.0
 github.com/prometheus/common/version
-# github.com/sirupsen/logrus v1.9.3
-## explicit; go 1.13
+# github.com/sirupsen/logrus v1.9.4
+## explicit; go 1.17
 github.com/sirupsen/logrus
 # github.com/vulcand/oxy v1.4.2
 ## explicit; go 1.17
