@@ -426,6 +426,7 @@ func (a AuthHandler) oidcLoginPage(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	w.Header().Set("X-Content-Type-Options", "nosniff")
 	w.Header().Set("X-Frame-Options", "DENY")
+	w.WriteHeader(http.StatusUnauthorized)
 
 	_, err = w.Write([]byte(makeLoginPageHtml(
 		loginPageTemplate,
