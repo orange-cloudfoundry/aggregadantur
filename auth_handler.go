@@ -339,13 +339,7 @@ func (a AuthHandler) checkJwt(jwtTokenRaw string, w http.ResponseWriter, req *ht
 	}
 
 	whichScope := ""
-	var scopes []string
-	if a.aggrRoute.Auth.OIDCAuth != nil {
-		scopes = a.aggrRoute.Auth.OIDCAuth.Scopes
-	} else {
-		scopes = a.aggrRoute.Auth.Oauth2Auth.Scopes
-	}
-	for _, scopeByPriorities := range scopes {
+	for _, scopeByPriorities := range a.aggrRoute.Auth.Oauth2Auth.Scopes {
 		for _, scope := range claim.Scope {
 			if scope == scopeByPriorities {
 				whichScope = scope
