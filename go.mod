@@ -1,6 +1,6 @@
 module github.com/orange-cloudfoundry/aggregadantur
 
-go 1.26
+go 1.26.0
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/common v0.71.0
 	github.com/sirupsen/logrus v1.10.2
 	github.com/vulcand/oxy v1.4.2
-	golang.org/x/oauth2 v0.36.0
+	golang.org/x/oauth2 v0.37.0
 	golang.org/x/text v0.41.0
 	gopkg.in/yaml.v2 v2.4.0
 )
