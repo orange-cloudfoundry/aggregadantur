@@ -14,7 +14,7 @@ require (
 	github.com/prometheus/common v0.73.1
 	github.com/sirupsen/logrus v1.10.2
 	github.com/vulcand/oxy v1.4.2
-	golang.org/x/oauth2 v0.37.0
+	golang.org/x/oauth2 v0.38.0
 	golang.org/x/text v0.43.0
 	gopkg.in/yaml.v2 v2.4.0
 )
