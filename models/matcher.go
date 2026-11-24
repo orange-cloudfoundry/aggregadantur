@@ -142,20 +142,20 @@ func (m HostMatchers) Match(s string) bool {
 }
 
 type HostMatcher struct {
-	glob.Glob
+	*glob.Pattern
 	raw string
 }
 
 func NewHostMatcher(hostOrWildcard string) *HostMatcher {
 	return &HostMatcher{
-		Glob: glob.MustCompile(hostOrWildcard, '.'),
-		raw:  hostOrWildcard,
+		Pattern: glob.MustCompile(hostOrWildcard, '.'),
+		raw:     hostOrWildcard,
 	}
 }
 
 func (re *HostMatcher) Load(s string) error {
 	var err error
-	re.Glob, err = glob.Compile(s, '.')
+	re.Pattern, err = glob.Compile(s, '.')
 	re.raw = s
 	return err
 }
